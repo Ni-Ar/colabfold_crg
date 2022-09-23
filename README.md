@@ -188,7 +188,7 @@ sed -i -e "s#props_path = \"stereo_chemical_props.txt\"#props_path = \"/users/mi
 
 ~~Run again `grep -B2 -A1  props_path batch.py ` to check that the absolute path to the stereo is correct. This "stereo_chemical_props.txt" path might not be needed anymore in future versions I believe.~~
 
-# Custom script for CRG cluster users
+# Custom script for CRG cluster
 
 I made a simple script that packages all the required variables for running colabfold on the CRG gpu cluster queues using the conda enviroment created above. This script is called `CRG_conda_run_colabfold.sh` and it takes easily input and predefined output and running parameters for jobs. 
 The wrapper will run `colabfold_batch` as:
@@ -233,7 +233,10 @@ Downloading alphafold2 weights to /users/mirimia/narecco/software/colabfold/cola
 The file `example/Nucleosome.fasta` contains 4 protein sequences formatted like this:
 ```fasta
 >Nucleosome_H3.1_H4_H2A-2a_H2B-1b_Human
-MARTKQTARKSTGGKAPRKQLATKAARKSAPATGGVKKPHRYRPGTVALREIRRYQKSTELLIRKLPFQRLVREIAQDFKTDLRFQSSAVMALQEACEAYLVGLFEDTNLCAIHAKRVTIMPKDIQLARRIRGERA:MSGRGKGGKGLGKGGAKRHRKVLRDNIQGITKPAIRRLARRGGVKRISGLIYEETRGVLKVFLENVIRDAVTYTEHAKRKTVTAMDVVYALKRQGRTLYGFGG:MSGRGKQGGKARAKAKSRSSRAGLQFPVGRVHRLLRKGNYAERVGAGAPVYMAAVLEYLTAEILELAGNAARDNKKTRIIPRHLQLAIRNDEELNKLLGKVTIAQGGVLPNIQAVLLPKKTESHHKAKGK:MPEPSKSAPAPKKGSKKAITKAQKKDGKKRKRSRKESYSIYVYKVLKQVHPDTGISSKAMGIMNSFVNDIFERIAGEASRLAHYNKRSTITSREIQTAVRLLLPGELAKHAVSEGTKAVTKYTSSK
+MARTKQTARKSTGGKAPRKQLATKAARKSAPATGGVKKPHRYRPGTVALREIRRYQKSTELLIRKLPFQRLVREIAQDFKTDLRFQSSAVMALQEACEAYLVGLFEDTNLCAIHAKRVTIMPKDIQLARRIRGERA:
+MSGRGKGGKGLGKGGAKRHRKVLRDNIQGITKPAIRRLARRGGVKRISGLIYEETRGVLKVFLENVIRDAVTYTEHAKRKTVTAMDVVYALKRQGRTLYGFGG:
+MSGRGKQGGKARAKAKSRSSRAGLQFPVGRVHRLLRKGNYAERVGAGAPVYMAAVLEYLTAEILELAGNAARDNKKTRIIPRHLQLAIRNDEELNKLLGKVTIAQGGVLPNIQAVLLPKKTESHHKAKGK:
+MPEPSKSAPAPKKGSKKAITKAQKKDGKKRKRSRKESYSIYVYKVLKQVHPDTGISSKAMGIMNSFVNDIFERIAGEASRLAHYNKRSTITSREIQTAVRLLLPGELAKHAVSEGTKAVTKYTSSK
 ```
 where the colon `:` is used to concatenate two or more sequences. For this kind of "multimer" input the command to run is the same as before:
 ```sh

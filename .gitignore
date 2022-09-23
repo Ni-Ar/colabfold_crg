@@ -1,0 +1,16 @@
+# Some binary files that the systems create
+.fuse_hidden*
+.DS_Store
+._.DS_Store
+._*
+
+# colabfold parameters from alphafold
+colabfold/params*
+
+# other things
+matplotlib/*
+stereo_chemical_props.txt
+
+# my old things
+old_stuff/*
+GPU_3090_*.sh

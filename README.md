@@ -5,24 +5,24 @@ What is ColabFold?
  - Read the [paper](https://www.nature.com/articles/s41592-022-01488-1) and check the [GitHub repository](https://github.com/sokrypton/ColabFold).
 
 I don't want to deal with installation and scripts, where can I find pre-computed structures?
-- If your canonical protein has a [UniProt](https://www.uniprot.org/) ID just search for it in the [EBI Alphafold database](https://alphafold.ebi.ac.uk/).
+- If your canonical protein has a [UniProt](https://www.uniprot.org/) ID just search it in the [EBI Alphafold database](https://alphafold.ebi.ac.uk/).
 
-My sequence is not on UniProt how can I quickly run ColabFold?
+My protein sequence is not in UniProt how can I quickly run ColabFold?
 - Use one of the offical [google colab notebooks](https://github.com/sokrypton/ColabFold#making-protein-folding-accessible-to-all-via-google-colab).
 
 What is this repo actually containing?
-- It's basically the [LocalColabFold](https://github.com/YoshitakaMo/localcolabfold) installation instructions and a custom script to submit to the CRG graphics cards.
+- Basically the [LocalColabFold](https://github.com/YoshitakaMo/localcolabfold) installation steps and a custom script to submit to the CRG graphics cards.
 
-What are the advantages of using this method?
+What are the advantages of using this *local* ColabFold?
 
-- You don't have the 12 hours GPU time limitations on google colabfold (CRG ma time is 168 hours on `gpu_long`).
-- Differently from AlphaFold2 you don't have to download the massive databases as everything is done on the ColabFold servers (that also cache quries!).
-- Structure prediction and `amber` relaxion are done on the Nvidia GPUs, i.e. faster prediction.
+- You don't have the 12 hours time limitations as for Google Colabs Notebooks. (CRG max time is 168 hours on `gpu_long`). Also, access to the GPU is more reliable as you'll use your local graphics card.
+- Differently from AlphaFold2 you don't have to download the massive databases as everything is done on the ColabFold servers (that also cache quries!). 
+- Structure prediction and `amber` relaxion are done on the GPUs, i.e. faster prediction.
 - More control on advanced parameters.
 
 # Installation
 
-These following steps are adapted from [this script of localColabFold](https://github.com/YoshitakaMo/localcolabfold/blob/main/install_colabbatch_linux.sh) and fit inside my current folder structure and already existing conda environment.
+These following steps are adapted from [this script of localColabFold](https://github.com/YoshitakaMo/localcolabfold/blob/main/install_colabbatch_linux.sh) repository. The installation fits my current folder structure and already existing conda.
 
 ## Make a `conda` environment
 If you don't have `miniconda` please first [install it](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html). If you have `conda` already installed please pay attention where it is installed with `which conda`. In my case returns `~/software/miniconda/condabin/conda`, however most people usually have it in `~/miniconda3/condabin/conda`. This is important cause later there are some editing to the colabfold python scripts installed by `conda`. Create a `software/colabfold` directory where some important files will be stored (e.g. Alphafold2 parameters, `matplotlib`, ~~aminoacid stero chemical properties~~).

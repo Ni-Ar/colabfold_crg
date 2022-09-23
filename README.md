@@ -230,13 +230,13 @@ Downloading alphafold2 weights to /users/mirimia/narecco/software/colabfold/cola
 ```
 
 # Run a multimer prediction
-If the file `example/double_short_seqs.fasta` contains 2 protein sequences formatted like this:
+The file `example/Nucleosome.fasta` contains 4 protein sequences formatted like this:
+```fasta
+>Nucleosome_H3.1_H4_H2A-2a_H2B-1b_Human
+MARTKQTARKSTGGKAPRKQLATKAARKSAPATGGVKKPHRYRPGTVALREIRRYQKSTELLIRKLPFQRLVREIAQDFKTDLRFQSSAVMALQEACEAYLVGLFEDTNLCAIHAKRVTIMPKDIQLARRIRGERA:MSGRGKGGKGLGKGGAKRHRKVLRDNIQGITKPAIRRLARRGGVKRISGLIYEETRGVLKVFLENVIRDAVTYTEHAKRKTVTAMDVVYALKRQGRTLYGFGG:MSGRGKQGGKARAKAKSRSSRAGLQFPVGRVHRLLRKGNYAERVGAGAPVYMAAVLEYLTAEILELAGNAARDNKKTRIIPRHLQLAIRNDEELNKLLGKVTIAQGGVLPNIQAVLLPKKTESHHKAKGK:MPEPSKSAPAPKKGSKKAITKAQKKDGKKRKRSRKESYSIYVYKVLKQVHPDTGISSKAMGIMNSFVNDIFERIAGEASRLAHYNKRSTITSREIQTAVRLLLPGELAKHAVSEGTKAVTKYTSSK
 ```
->two_short_seqs
-PIAQIHILEGRSDEQKETLIREVSEAISRSLDAPLTSVRVIITEMAKGHFGIGGELASK:KSALEGGIGFHGKAMETIIVRVSTLPADLSRSIAESVERILTEKQEDSRGELIHIQAIP
-```
-where the colon `:` is used to concatenate two or more sequences the command to run is the following:
+where the colon `:` is used to concatenate two or more sequences. For this kind of "multimer" input the command to run is the same as before:
 ```sh
-./CRG_conda_run_colabfold.sh -i example/double_short_seqs.fasta -q 'gpu' 
+./CRG_conda_run_colabfold.sh -i example/Nucleosome.fasta -q 'gpu' 
 ```
 

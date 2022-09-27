@@ -62,8 +62,15 @@ echo -e "Input name: $INPUT_NAME"
 # ADDITIONAL PARAMS
 ## OUTPUT
 if [[ "$OUTPUT_DIR" == "" ]] ; then
-    # If output is not specified
-    OUTPUT_DIR="~/projects/12_Predicted_Structures/data/pdb/CF/${INPUT_NAME}"
+
+    # If output is not specified create one based on the user.
+    if [[ $USER =~ "narecco" ]] ; then
+        OUTPUT_DIR="${HOME}/projects/12_Predicted_Structures/data/pdb/CF/${INPUT_NAME}"
+    else
+	    OUTPUT_DIR="${HOME}/pdb/CF/${INPUT_NAME}" 
+    fi
+
+    # if output location doesn't exist create one
     if [ -d ${OUTPUT_DIR} ]  ; then
         echo -e "Automatic output directory already exists!\n${OUTPUT_DIR}\nStopping to avoid re-computing or overwriting!" 
         exit
@@ -74,6 +81,7 @@ if [[ "$OUTPUT_DIR" == "" ]] ; then
 else 
     echo -e "Output directory: $OUTPUT_DIR"     
 fi
+
 ## MULTIMER MODEL 
 if [[ "$MODEL_TYPE" == "multi" ]] ; then
     MODEL_CMD=$( echo "--model-type AlphaFold2-multimer-2" )
@@ -101,8 +109,8 @@ else
 fi 
 
 # Set the working directory where the colabfold params are saved.
-CF_DIR="~/software/colabfold"
-cd ${CF_DIR}
+CF_DIR="${HOME}/software/colabfold"
+cd $CF_DIR
 
 ## Exporting local variables 
 # export NVIDIA_VISIBLE_DEVICES='all'
@@ -128,11 +136,11 @@ export XLA_FLAGS="--xla_gpu_force_compilation_parallelism=1"
 # export TF_FORCE_GPU_ALLOW_GROWTH="true"
 
 ## ColabFold control
-export COLABFOLDDIR="~/software/colabfold"
-export XDG_CACHE_HOME="~/software/colabfold"
+export COLABFOLDDIR="${HOME}/software/colabfold"
+export XDG_CACHE_HOME="${HOME}/software/colabfold"
 
 ## Set up directories paths
-JOBS_OUT_DIR="~/qsub_out/${DATE}/CF"
+JOBS_OUT_DIR="${HOME}/qsub_out/${DATE}/CF"
 mkdir -p ${JOBS_OUT_DIR}
 
 # Print info before running the job

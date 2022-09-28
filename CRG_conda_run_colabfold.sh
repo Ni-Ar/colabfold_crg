@@ -1,25 +1,29 @@
-#!/bin/sh
+#!/bin/bash
 
 # ColabFold script with a conda env.
 # Author: Niccolo' Arecco
-# Last modifications 23/Sept/2022
+# Last modifications 28/Sept/2022
 
 usage() {
         echo ""
-        echo "Please make sure all required parameters are given"
-        echo "Usage: $0 <OPTIONS>"
-        echo "Required Parameters:"
+        echo "Usage: $0 -i <DIR|FASTA> -q <'gpu'|'gpu_long'> <EXTRA OPTIONS>"
+        echo -e "\nRequired Parameters:"
         echo "-i <DIR|FASTA>          Path to directory with input fasta/a3m files or a csv/tsv file or a fasta file or an a3m file."
         echo "-q <'gpu'|'gpu_long'>   Name of the CRG gpu queue to use. This script selects the right hard resource to use for the prediction based on the queue."
-        echo "Additional Parameters:"
-        echo "-o <OUTPUT/PATH/DIR>    Path to a directory that will store the results."
-        echo "-m <'multi'>            Run CF with AF2 multimer mode. Deafult is <'auto'>"
+        echo -e "\nAdditional Parameters:"
+        echo "-o <OUTPUT/PATH/DIR>    Relative path from ${HOME} to a directory that will store the results. Example: -o sharing/cf_for_friend"
+        echo "-m <'multi'>            Run CF with a specific AF2 multimer mode. Deafult is <'auto'>."
+        echo "-h                      Show this help and exit."
         echo ""
         exit 1
 }
 
-while getopts ":i:o:q:m:" i; do
-        case "${i}" in
+while getopts ":h:i:o:q:m:" option; do
+        case $option in
+        h)
+                usage
+                exit 1
+        ;;
         i)
                 INPUT=$OPTARG
         ;;
@@ -29,7 +33,12 @@ while getopts ":i:o:q:m:" i; do
         q)
                 QUEUE_NAME=$OPTARG
         ;;
-        m)      MODEL_TYPE=$OPTARG
+        m)     
+                MODEL_TYPE=$OPTARG
+        ;;
+        \?)     
+                echo "Error: '-$OPTARG' is an invalid option"
+                exit
         ;;
         esac
 done
@@ -37,7 +46,7 @@ done
 # REQUIRED PARAMS
 # Parse params and set defaults
 if [[ "$INPUT" == "" ]] ; then
-    echo -e "\nSpecify the input directory!\n"
+    echo -e "\nSpecify the input directory!"
     echo "-i <DIR|FASTA> Path to directory with input fasta/a3m files or a csv/tsv file or a fasta file or an a3m file."
     exit
 fi
@@ -48,7 +57,7 @@ if [[ "$QUEUE_NAME" == "" ]] ; then
     exit
 fi
 
-# print info about the fasta file:
+# Print info about the fasta file:
 FASTA_SUFFIX_REGEX="fasta$"
 if [[ $INPUT =~ $FASTA_SUFFIX_REGEX ]]; then
     # in case the input is a file file that ends with ".fasta" file format
@@ -69,17 +78,18 @@ if [[ "$OUTPUT_DIR" == "" ]] ; then
     else
 	    OUTPUT_DIR="${HOME}/pdb/CF/${INPUT_NAME}" 
     fi
-
-    # if output location doesn't exist create one
-    if [ -d ${OUTPUT_DIR} ]  ; then
-        echo -e "Automatic output directory already exists!\n${OUTPUT_DIR}\nStopping to avoid re-computing or overwriting!" 
-        exit
-    else
-        mkdir -p ${OUTPUT_DIR}
-        echo -e "Saving output to default location. If you want use -o <PATH> to specify where to save the results."
-    fi
 else 
-    echo -e "Output directory: $OUTPUT_DIR"     
+    OUTPUT_DIR="${HOME}/$OUTPUT_DIR" 
+    # echo -e "Output directory: $OUTPUT_DIR"     
+fi
+
+# If output dir doesn't exist create one
+if [ -d ${OUTPUT_DIR} ]  ; then
+    echo -e "Output directory already exists!\n${OUTPUT_DIR}\nStopping to avoid re-computing or overwriting!" 
+    exit
+else
+    mkdir -p ${OUTPUT_DIR}
+    # echo -e "Creating output directory for you."
 fi
 
 ## MULTIMER MODEL 
@@ -144,9 +154,9 @@ JOBS_OUT_DIR="${HOME}/qsub_out/${DATE}/CF"
 mkdir -p ${JOBS_OUT_DIR}
 
 # Print info before running the job
-echo -e "\n\tCRG Queue: ${QUEUE_NAME}\n\tMax wallclock time allowed per prediction: ${Num_Hours}:59 (hh:mm)\n\tNum Processes: ${Num_Processes}\n\tCPU Ram per process: ${Num_Ram}Gb\n\tNum GPU(s): ${Num_GPUs} (NVIDIA RTX 2080 Ti)\n\tOuput: ${OUTPUT_DIR}\n\tLog file: ${JOBS_OUT_DIR}/${INPUT_NAME}_std{out|err}.log"
+echo -e "\nqsub params:\n\tCRG queue name: ${QUEUE_NAME}\n\tMax wallclock time allowed: ${Num_Hours}:59 (hh:mm)\n\tNum Processes: ${Num_Processes}\n\tCPU Ram per process: ${Num_Ram}Gb\n\tNum GPU(s): ${Num_GPUs} (NVIDIA RTX 2080 Ti)\n\tOuput: ${OUTPUT_DIR}\n\tLog file: ${JOBS_OUT_DIR}/${INPUT_NAME}_std{out|err}.log"
 
-echo -e "\n\tGPU exported variables\n\tVisible GPUs: $NVIDIA_VISIBLE_DEVICES\n\tTensorFlow unified memory: $TF_FORCE_UNIFIED_MEMORY\n\tAllow GPU memory pre-allocation: $XLA_PYTHON_CLIENT_PREALLOCATE\n\tPre-allocated percentage of currently-available GPU memory (if allowed): $XLA_PYTHON_CLIENT_MEM_FRACTION%\n\tMinimal GPU footprint: $XLA_PYTHON_CLIENT_ALLOCATOR\n\tAllow GPU growth: $TF_FORCE_GPU_ALLOW_GROWTH"
+echo -e "\nGPU exported variables:\n\tVisible GPUs: $NVIDIA_VISIBLE_DEVICES\n\tTensorFlow unified memory: $TF_FORCE_UNIFIED_MEMORY\n\tAllow GPU memory pre-allocation: $XLA_PYTHON_CLIENT_PREALLOCATE\n\tPre-allocated percentage of currently-available GPU memory (if allowed): $XLA_PYTHON_CLIENT_MEM_FRACTION%\n\tMinimal GPU footprint: $XLA_PYTHON_CLIENT_ALLOCATOR\n\tAllow GPU growth: $TF_FORCE_GPU_ALLOW_GROWTH"
 
 sleep 2
 

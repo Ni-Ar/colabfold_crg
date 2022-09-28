@@ -20,6 +20,21 @@ What are the advantages of using this *local* ColabFold?
 - Structure prediction and `amber` relaxion are done on the GPUs, i.e. faster prediction.
 - More control on advanced parameters.
 
+What's the *longest* protein structure I can predict?
+
+- In my experience I predicted combined dimer complex of a combined sequence length of ~1700 aminoacids between the 2 proteins. I believe the biggest limiting factor is the MSA size.
+
+# Quick start
+
+From a CRG cluster ant-login node:
+
+```sh
+conda activate colabfold
+./CRG_conda_run_colabfold.sh -i your_protein_seq.fasta -q 'gpu'
+```
+
+This will submit a job using the CRG graphics cards and save everything in a default output folder.
+
 # Installation
 
 These following steps are adapted from [this script of localColabFold](https://github.com/YoshitakaMo/localcolabfold/blob/main/install_colabbatch_linux.sh) repository. The installation fits my current folder structure and already existing conda.
@@ -49,7 +64,7 @@ qrsh -q gpu
 ```
 and wait until the login access request is processed. However if the cards are in use you won't be able to access them.
 
-2. Make sure your Cuda compiler driver is **11.1 or later** (If you don't plan to use a GPU, you can skip this section):
+2. Make sure your Cuda compiler driver is **11.1 or later** (if you don't plan to use a GPU, you can skip this section):
 
 Install `nvcc` in the colabfold env that you already created beforehand.
 ```sh
@@ -153,7 +168,7 @@ colabfold_batch --help
 ```
 Which shows the usage.
 
-Old fixes not really required anymore.
+**Old fixes not really required anymore.**
 
 ~~Get the `stereo_chemical_props.txt` file.~~
 
@@ -203,20 +218,27 @@ You can test this wrapper always making sure the `conda colabfold` environment i
 ./CRG_conda_run_colabfold.sh -i example/short_seq.fasta -q 'gpu'
 ```
 This will launch a job on the `gpu` queue and print some info:
-```
+```reStructuredText
 Input name: short_seq
-Output dir: ~/projects/12_Predicted_Structures/data/pdb/CF/short_seq	
-Use -o <PATH> to specify where to store the results.
 
-	CRG Queue: gpu
-	Max wallclock time allowed per prediction: 01:59 (hh:mm)
+qsub params:
+	CRG queue name: gpu
+	Max wallclock time allowed: 01:59 (hh:mm)
 	Num Processes: 6
 	CPU Ram per process: 64Gb
 	Num GPU(s): 1 (NVIDIA RTX 2080 Ti)
 	Ouput: /users/mirimia/narecco/projects/12_Predicted_Structures/data/pdb/CF/short_seq
-	Log file: /users/mirimia/narecco/qsub_out/2022_08_02/CF/short_seq_std{out|err}.log
+	Log file: /users/mirimia/narecco/qsub_out/<TODAY>/CF/short_seq_std{out|err}.log
+
+GPU exported variables:
+	Visible GPUs: 
+	TensorFlow unified memory: 1
+	Allow GPU memory pre-allocation: 
+	Pre-allocated percentage of currently-available GPU memory (if allowed): 4.0%
+	Minimal GPU footprint: 
+	Allow GPU growth: 
 ```
-Please note that the first time `colabfold_batch` is run, it automatically downloads the AlphaFold model parameters as you can see with:
+Please note that the first time `colabfold_batch` is run, it automatically downloads the AlphaFold2 model parameters as you can see with:
 ```sh
 ls ~/software/colabfold/colabfold/params
 params_model_1.npz params_model_2.npz params_model_3.npz params_model_4.npz params_model_5.npz 
@@ -229,7 +251,27 @@ Downloading alphafold2 weights to /users/mirimia/narecco/software/colabfold/cola
 Downloading alphafold2 weights to /users/mirimia/narecco/software/colabfold/colabfold: 100% 3.47G/3.47G [01:13<00:00, 50.8MB/s]
 ```
 
+To check the full usage of the bash script to submit the jobs to the CRG cluster use the `-h` command:
+
+```sh
+./CRG_conda_run_colabfold.sh -h
+```
+
+```bash
+Usage: ./CRG_conda_run_colabfold.sh -i <DIR|FASTA> -q <'gpu'|'gpu_long'> <EXTRA OPTIONS>
+
+Required Parameters:
+-i <DIR|FASTA>          Path to directory with input fasta/a3m files or a csv/tsv file or a fasta file or an a3m file.
+-q <'gpu'|'gpu_long'>   Name of the CRG gpu queue to use. This script selects the right hard resource to use for the prediction based on the queue.
+
+Additional Parameters:
+-o <OUTPUT/PATH/DIR>    Relative path from /users/mirimia/narecco to a directory that will store the results. Example: -o sharing/cf_for_friend
+-m <'multi'>            Run CF with a specific AF2 multimer mode. Deafult is <'auto'>.
+-h                      Show this help and exit.
+```
+
 # Run a multimer prediction
+
 The file `example/Nucleosome.fasta` contains 4 protein sequences formatted like this:
 ```fasta
 >Nucleosome_H3.1_H4_H2A-2a_H2B-1b_Human

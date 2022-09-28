@@ -1,4 +1,7 @@
+# FAQ
+
 What is this?
+
  - My installation notes and script for running ColabFold on the [CRG](https://www.crg.eu/) GPU clusters.
 
 What is ColabFold?
@@ -24,6 +27,10 @@ What's the *longest* protein structure I can predict?
 
 - In my experience I predicted combined dimer complex of a combined sequence length of ~1700 aminoacids between the 2 proteins. I believe the biggest limiting factor is the MSA size.
 
+Is this script limited to the CRG users? 
+
+- No, I believe, with minimal tweaking, an experienced user can get it to work on other job schedulers for HPC clusters with Nvidia graphics cards.
+
 # Quick start
 
 From a CRG cluster ant-login node:
@@ -40,7 +47,9 @@ This will submit a job using the CRG graphics cards and save everything in a def
 These following steps are adapted from [this script of localColabFold](https://github.com/YoshitakaMo/localcolabfold/blob/main/install_colabbatch_linux.sh) repository. The installation fits my current folder structure and already existing conda.
 
 ## Make a `conda` environment
-If you don't have `miniconda` please first [install it](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html). If you have `conda` already installed please pay attention where it is installed with `which conda`. In my case returns `~/software/miniconda/condabin/conda`, however most people usually have it in `~/miniconda3/condabin/conda`. This is important cause later there are some editing to the colabfold python scripts installed by `conda`. Create a `software/colabfold` directory where some important files will be stored (e.g. Alphafold2 parameters, `matplotlib`, ~~aminoacid stero chemical properties~~).
+If you don't have `miniconda` please first [install it](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html). If you have `conda` already installed please pay attention where it is installed with `which conda`. In my case, it returns `~/software/miniconda/condabin/conda`, however for most people it usually returns `~/miniconda3/condabin/conda`. This is important because later there is one source code editing hack to the colabfold python scripts installed by `conda`. 
+
+Create a `software/colabfold` directory where some important files will be stored (e.g. Alphafold2 parameters, `matplotlib`, ~~aminoacid stero chemical properties~~).
 
 ```sh
 mkdir -p ~/software/colabfold ; cd ~/software/colabfold
@@ -56,7 +65,7 @@ conda update -n base conda -y
 ```
 ## Linux Requirment
 
-1. For CRG users you need to ask IT access to the GPU cluster.
+1. For CRG users you need to [open a ticket to IT](https://request.crg.es/) to request access to the GPU cluster.
 
 To check if you can access the CRG gpu queue try the following from the ant-login node:
 ```sh

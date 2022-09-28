@@ -18,7 +18,7 @@ usage() {
         exit 1
 }
 
-while getopts ":h:i:o:q:m:" option; do
+while getopts ":hi:o:q:m:" option; do
         case $option in
         h)
                 usage

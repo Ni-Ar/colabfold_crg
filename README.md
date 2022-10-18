@@ -212,6 +212,21 @@ sed -i -e "s#props_path = \"stereo_chemical_props.txt\"#props_path = \"/users/mi
 
 ~~Run again `grep -B2 -A1  props_path batch.py ` to check that the absolute path to the stereo is correct. This "stereo_chemical_props.txt" path might not be needed anymore in future versions I believe.~~
 
+## Test installation
+
+```sh
+cd ~/software/colabfold
+qsub ~/software/colabfold/submission_test.sh 
+```
+
+and then check the log with:
+
+```sh
+cat test_log_out.txt
+```
+
+
+
 # Custom script for CRG cluster
 
 I made a simple script that packages all the required variables for running colabfold on the CRG gpu cluster queues using the conda enviroment created above. This script is called `CRG_conda_run_colabfold.sh` and it takes easily input and predefined output and running parameters for jobs. 

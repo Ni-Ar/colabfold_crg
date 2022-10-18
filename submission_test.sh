@@ -31,8 +31,14 @@ export XDG_CACHE_HOME="${HOME}/software/colabfold"
 
 python /users/mirimia/narecco/software/colabfold/python_configuration_test.py  
 
+echo -e "\nChecking GPUs\n"
+
 nvcc --version
 
 !nvidia-smi
+
+echo -e "\nChecking GNU compiler version\n"
+
+gcc --version
 
 echo -e "\nEnd of the test, check the log files.\n"

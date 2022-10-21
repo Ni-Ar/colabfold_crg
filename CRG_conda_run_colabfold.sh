@@ -157,7 +157,7 @@ mkdir -p ${JOBS_OUT_DIR}
 echo -e "\nqsub params:\n\tCRG queue name: ${QUEUE_NAME}\n\tMax wallclock time allowed: ${Num_Hours}:59 (hh:mm)\n\tNum Processes: ${Num_Processes}\n\tCPU Ram per process: ${Num_Ram}Gb\n\tNum GPU(s): ${Num_GPUs} (NVIDIA RTX 2080 Ti)\n\tOuput: ${OUTPUT_DIR}\n\tLog file: ${JOBS_OUT_DIR}/${INPUT_NAME}_std{out|err}.log"
 
 echo -e "\nGPU exported variables:\n\tVisible GPUs: $NVIDIA_VISIBLE_DEVICES\n\tTensorFlow unified memory: $TF_FORCE_UNIFIED_MEMORY\n\tAllow GPU memory pre-allocation: $XLA_PYTHON_CLIENT_PREALLOCATE\n\tPre-allocated percentage of currently-available GPU memory (if allowed): $XLA_PYTHON_CLIENT_MEM_FRACTION%\n\tMinimal GPU footprint: $XLA_PYTHON_CLIENT_ALLOCATOR\n\tAllow GPU growth: $TF_FORCE_GPU_ALLOW_GROWTH"
-    
+
 sleep 2
 
 # Run Colabfold with required parameters using qsub
@@ -172,7 +172,7 @@ qsub -q ${QUEUE_NAME} -V -pe smp ${Num_Processes} -l gpu=${Num_GPUs} \
      -o "${JOBS_OUT_DIR}/${INPUT_NAME}_stdout.log" \
      -e "${JOBS_OUT_DIR}/${INPUT_NAME}_stderr.log" \
      -b y \
-     colabfold_batch --amber --templates --num-recycle 4 --use-gpu-relax --num-models 3 --model-order 1,2,3 \
+     colabfold_batch --amber --templates --num-recycle 4 --use-gpu-relax --num-models 5 --model-order 1,2,3,4,5 \
                      --random-seed 16 ${MODEL_CMD} ${INPUT} ${OUTPUT_DIR}
 
 # no vaya a ser que == por si (que)

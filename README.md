@@ -13,15 +13,20 @@ I don't want to deal with installation and scripts, where can I find pre-compute
 My protein sequence is not in UniProt how can I quickly run ColabFold?
 - Use one of the offical [google colab notebooks](https://github.com/sokrypton/ColabFold#making-protein-folding-accessible-to-all-via-google-colab).
 
+I'm looking for something a bit more streamlined to implement in existing workflows. Running code from a web browser tab is not always ideal, e.g. lots of sequences to model and integrate with other tools.
+- Then you've come to right place and this repo could be useful for you!
+
 What is this repo actually containing?
 - Basically the [LocalColabFold](https://github.com/YoshitakaMo/localcolabfold) installation steps and a custom script to submit to the CRG graphics cards.
 
 What are the advantages of using this *local* ColabFold?
 
-- You don't have the 12 hours time limitations as for Google Colabs Notebooks. (CRG max time is 168 hours on `gpu_long`). Also, access to the GPU is more reliable as you'll use your local graphics card and there's no need to re-install everything each time
+- You don't have the 12 hours time limitations as for Google Colabs Notebooks. (CRG max time is 168 hours on `gpu_long`). 
+- Access to the GPU is more reliable as you'll use your local graphics card.
+- No need to re-install everything each time as for the Colab notebooks.
 - Differently from AlphaFold2 you don't have to download the massive databases as everything is done on the ColabFold servers (that also cache queries!). 
 - Structure prediction and `amber` relaxion are done on the GPUs, i.e. faster prediction.
-- More control on advanced parameters
+- More control on advanced parameters.
 
 What's the *longest* protein structure I can predict?
 

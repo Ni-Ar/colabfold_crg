@@ -15,3 +15,5 @@ stereo_chemical_props.txt
 old_stuff/*
 GPU_3090_*.sh
 test_log_*
+cf_stderr.log*
+cf_stdout.log

@@ -8,7 +8,7 @@ What is ColabFold?
  - Read the [paper](https://www.nature.com/articles/s41592-022-01488-1) and check the [GitHub repository](https://github.com/sokrypton/ColabFold).
 
 I don't want to deal with installation and scripts, where can I find pre-computed structures?
-- If your canonical protein has a [UniProt](https://www.uniprot.org/) ID just search it in the [EBI Alphafold database](https://alphafold.ebi.ac.uk/).
+- If your *canonical* protein has a [UniProt](https://www.uniprot.org/) ID just search it in the [EBI Alphafold database](https://alphafold.ebi.ac.uk/).
 
 My protein sequence is not in UniProt how can I quickly run ColabFold?
 - Use one of the offical [google colab notebooks](https://github.com/sokrypton/ColabFold#making-protein-folding-accessible-to-all-via-google-colab).
@@ -17,7 +17,7 @@ I'm looking for something a bit more streamlined to implement in existing workfl
 - Then you've come to right place and this repo could be useful for you!
 
 What is this repo actually containing?
-- Basically the [LocalColabFold](https://github.com/YoshitakaMo/localcolabfold) installation steps and a custom script to submit to the CRG graphics cards.
+- Basically the [LocalColabFold](https://github.com/YoshitakaMo/localcolabfold) installation steps and a script for submitting to the CRG graphics cards.
 
 What are the advantages of using this *local* ColabFold?
 
@@ -30,7 +30,7 @@ What are the advantages of using this *local* ColabFold?
 
 What's the *longest* protein structure I can predict?
 
-- In my experience I predicted combined dimer complex of a combined sequence length of ~1700 aminoacids between the 2 proteins. I believe the biggest limiting factor is the MSA size.
+- In my experience I predicted a 4 proteins complex with a combined sequence length of 2328 aminoacids. (I believe the biggest limiting factor is the MSA size)
 
 Is this script limited to the CRG users? 
 
@@ -42,10 +42,10 @@ From a CRG cluster ant-login node:
 
 ```sh
 conda activate colabfold
-./CRG_conda_run_colabfold.sh -i your_protein_seq.fasta -q 'gpu'
+qsub ./CRG_conda_run_colabfold.sh
 ```
 
-This will submit a job using the CRG graphics cards and save everything in a default output folder.
+where inside `CRG_conda_run_colabfold.sh` you specify the input fasta file and the `colabfold_batch` parameters and this will submit a job using the CRG graphics cards.
 
 # Installation
 
@@ -54,20 +54,23 @@ These following steps are adapted from [this script of localColabFold](https://g
 ## Make a `conda` environment
 If you don't have `miniconda` please first [install it](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html). If you have `conda` already installed please pay attention where it is installed with `which conda`. In my case, it returns `~/software/miniconda/condabin/conda`, however for most people it usually returns `~/miniconda3/condabin/conda`. This is important because later there is one source code editing hack to the colabfold python scripts installed by `conda`. 
 
-Create a `software/colabfold` directory where some important files will be stored (e.g. Alphafold2 parameters, `matplotlib`, ~~aminoacid stero chemical properties~~).
+Create a `software/colabfold` directory where some important files will be stored (e.g. Alphafold2 parameters and `matplotlib`).
 
 ```sh
 mkdir -p ~/software/colabfold ; cd ~/software/colabfold
 ```
 Now create a new `conda` environment with:
 ```sh
-conda create --name colabfold python==3.7 -y
+conda create --name colabfold python==3.8 -y
 conda activate colabfold
 ```
-Start by first updating `conda` with:
+*Optionally*, start by first updating `conda` with:
+
 ```sh
 conda update -n base conda -y
 ```
+This was tested with `conda` version 4.14.0.
+
 ## Linux Requirment
 
 1. For CRG users you need to [open a ticket to IT](https://request.crg.es/) to request access to the GPU cluster.
@@ -76,7 +79,7 @@ To check if you can access the CRG gpu queue try the following from the ant-logi
 ```sh
 qrsh -q gpu
 ```
-and wait until the login access request is processed. However if the cards are in use you won't be able to access them.
+and wait until the login access request is processed. However if the cards are in use you won't be able to access them. You can check the available graphics card details with: `nvidia-smi`
 
 2. Make sure your Cuda compiler driver is **11.1 or later** (if you don't plan to use a GPU, you can skip this section):
 
@@ -90,8 +93,8 @@ nvcc --version
 ```
 Which should return:
 ```reStructuredText
-Cuda compilation tools, release 11.7, V11.7.64
-Build cuda_11.7.r11.7/compiler.31294372_0
+Cuda compilation tools, release 12.0, V12.0.140
+Build cuda_12.0.r12.0/compiler.32267302_0
 ```
 3. Make sure your GNU compiler version is **4.9 or later** because `GLIBCXX_3.4.20` is required:
 ```sh
@@ -103,7 +106,7 @@ gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-4)
 ```
 If the version is `4.8.5` or older (e.g. CentOS 7) which is what the CRG cluster has install a new one with this:
 ```sh
-conda install -c conda-forge gcc
+conda install -c conda-forge gcc -y
 ```
 then check again:
 ```sh
@@ -111,68 +114,145 @@ gcc --version
 ```
 and you'll see that now the requirment is satisfied:
 ```reStructuredText
-gcc (conda-forge gcc 12.1.0-16) 12.1.0
+gcc (conda-forge gcc 12.2.0-19) 12.2.0
 ```
 
 ## Install `python` packages 
 Start with:
 ```sh
-conda install -c conda-forge python=3.7 cudnn==8.2.1.32 cudatoolkit==11.1.1 openmm==7.5.1 pdbfixer -y
+conda install -c conda-forge python=3.8 cudnn==8.2.1.32 cudatoolkit==11.1.1 openmm==7.5.1 pdbfixer -y
 ```
 Install alignment tools:
 
 ```sh
-conda install -c conda-forge -c bioconda kalign3=3.2.2 hhsuite=3.3.0 -y
+conda install -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 mmseqs2=14.7e284 -y
 ```
 
 Install ColabFold using the `pip`:
 
-```python
-pip install "colabfold[alphafold] @ git+https://github.com/sokrypton/ColabFold"
+```shell
+python3.8 -m pip install -q --no-warn-conflicts "colabfold[alphafold-minus-jax] @ git+https://github.com/sokrypton/ColabFold"
 ```
 
 Install Jax wheels that are only available on linux.
 
-```python
-pip install https://storage.googleapis.com/jax-releases/cuda11/jaxlib-0.3.10+cuda11.cudnn82-cp37-none-manylinux2014_x86_64.whl
+```shell
+python3.8 -m pip install https://storage.googleapis.com/jax-releases/cuda11/jaxlib-0.3.25+cuda11.cudnn82-cp38-cp38-manylinux2014_x86_64.whl
 ```
 
 You should be able to read something like this:
 
-```reStructuredText
-Successfully installed jaxlib-0.1.72+cuda111
+```text
+Successfully installed jaxlib-0.3.25+cuda11.cudnn82
 ```
 
-Install `jax`
+Install `jax` (it was probably installed in the previous step, but better run it anyway)
 
 ```python
-pip install jax==0.3.13
+python3.8 -m pip install jax==0.3.25 biopython==1.79
 ```
 
 You should see something like this:
 
-```reStructuredText
-Successfully installed jax-0.2.25
+```text
+Successfully installed jax-0.3.25
 ```
 
 If you have doubts on the version you installed you can check the installations with:
 
-```sh
+```shell
 conda list <package_name>
-cudatoolkit               11.1.1 
-jaxlib                    0.1.72+cuda111  
+cudatoolkit               11.1.1
 cudnn                     8.2.1.32
+jaxlib                    0.3.25+cuda11.cudnn82 
 ```
 
+### Manual changes to the installed software
+
 Change directory for another change:
+
 ```sh
-cd ~/software/miniconda/envs/colabfold/lib/python3.7/site-packages/colabfold
+cd ~/software/miniconda/envs/colabfold/lib/python3.8/site-packages/colabfold
 ```
-Use 'Agg' for non-GUI backend
+#### `matplotlib`
+
+Check how the python module `matplotlib` is imported:
+
+```shell
+grep -A2 -B2 "from matplotlib import pyplot as plt" plot.py 
+```
+
+```python
+import numpy as np
+from matplotlib import pyplot as plt
+```
+
+Make a change in how `matplotlib` is imported: use 'Agg' for non-GUI backend
+
 ```sh
 sed -i -e "s#from matplotlib import pyplot as plt#import matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt#g" plot.py
 ```
+Now you can see the change again with teh same `grep` command:
+
+```shell
+grep -A2 -B2 "matplotlib" plot.py 
+```
+
+```python
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+```
+
+#### Default location of params
+
+Check details in the `download.py` script about where the Alphafold2 params are downloaded.
+
+```shell
+grep -A1 -B3 "appdirs.user_cache_dir(__package__ or" download.py
+```
+
+```python
+# The data dir location logic switches between a version with and one without "params" because alphafold
+# always internally joins "params". (We should probably patch alphafold)
+default_data_dir = Path(appdirs.user_cache_dir(__package__ or "colabfold"))
+```
+
+Create a variable `COLABFOLDDIR` with your default `path/to/folder`. In my case it looks like this:
+
+```shell
+COLABFOLDDIR="/users/mirimia/narecco/software/colabfold"
+```
+
+Modify the default params directory with:
+
+```shell
+sed -i -e "s#appdirs.user_cache_dir(__package__ or \"colabfold\")#\"${COLABFOLDDIR}/colabfold\"#g" download.py
+```
+
+Check the change with:
+
+```shell
+grep -A1 -B3 "default_data_dir = Path(" download.py
+```
+
+```python
+# The data dir location logic switches between a version with and one without "params" because alphafold
+# always internally joins "params". (We should probably patch alphafold)
+default_data_dir = Path("/users/mirimia/narecco/software/colabfold/colabfold")
+```
+
+#### Remove cache directory
+
+```shell
+rm -rf __pycache__
+```
+
+***Done!***
+
 Go back to the software directory:
+
 ```sh
 cd ~/software/colabfold/
 ```
@@ -182,45 +262,37 @@ colabfold_batch --help
 ```
 Which shows the usage.
 
-**Old fixes not really required anymore.**
+### Download the alphafold params
 
-~~Get the `stereo_chemical_props.txt` file.~~
+Simply run:
 
-```sh
-wget https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt --no-check-certificate
+```shell
+python3.8 -m colabfold.download
 ```
 
-~~Get the `openmm` patch~~
+which shows the progress bar
 
-```sh
-wget -qnc https://raw.githubusercontent.com/deepmind/alphafold/main/docker/openmm.patch --no-check-certificate
+```shell
+Downloading alphafold2 weights to /users/mirimia/narecco/software/colabfold/colabfold
 ```
 
-~~Apply the patch. (Modify your miniconda path to accordingly)~~
+the whole `params` folder is 6.3Gb as shown with ` du -h colabfold/params`.
 
-```sh
-(cd ~/software/miniconda/envs/colabfold/lib/python3.7/site-packages; patch -s -p0 <  ~/software/colabfold/openmm.patch)
+You'll find 2 empty files informing you that the params have been successfully downloaded
+
+```shell
+ls colabfold/params/*_finished.txt
 ```
 
-~~Remove patch `rm openmm.patch`.~~
-~~Hack to share the parameter files in a workstation. Move to where the script `props_path batch.py` was installed with:~~
-
-```sh
-cd ~/software/miniconda/envs/colabfold/lib/python3.7/site-packages/colabfold/
-```
-
-~~See what we are going to change with `grep -B2 -A1  props_path batch.py `. Change path with:~~
-
-```sh
-sed -i -e "s#props_path = \"stereo_chemical_props.txt\"#props_path = \"/users/mirimia/narecco/software/colabfold/stereo_chemical_props.txt\"#" batch.py
-```
-
-~~Run again `grep -B2 -A1  props_path batch.py ` to check that the absolute path to the stereo is correct. This "stereo_chemical_props.txt" path might not be needed anymore in future versions I believe.~~
+If you want you can remove them.
 
 ## Test installation
 
+If everything went well you should be able to run colabfold. I made a small script that test some installations and job submission to the `gpu` queue. 
+
 ```sh
 cd ~/software/colabfold
+conda activate colabfold
 qsub ~/software/colabfold/submission_test.sh 
 ```
 
@@ -230,87 +302,42 @@ and then check the log with:
 cat test_log_out.txt
 ```
 
+This test script will try to load the libraries `tensorflow`, `jax`, and `jaxlib` and will print their version.
 
+# Run a monomer prediction
 
-# Custom script for CRG cluster
-
-I made a simple script that packages all the required variables for running colabfold on the CRG gpu cluster queues using the conda enviroment created above. This script is called `CRG_conda_run_colabfold.sh` and it takes easily input and predefined output and running parameters for jobs. 
-The wrapper will run `colabfold_batch` as:
-
-```sh
-colabfold_batch --amber --templates --num-recycle 5 \
-				--use-gpu-relax --num-models 5 --model-order 1,2,3,4,5 \
-				--random-seed 16 --model-type auto $INPUT $OUTPUT_DIR
-```
-You can test this wrapper always making sure the `conda colabfold` environment is activated and that the script as execution rights (i.e. `chmod +x CRG_conda_run_colabfold.sh`) with:
-```sh
-./CRG_conda_run_colabfold.sh -i example/short_seq.fasta -q 'gpu'
-```
-This will launch a job on the `gpu` queue and print some info:
-```reStructuredText
-Input name: short_seq
-
-qsub params:
-	CRG queue name: gpu
-	Max wallclock time allowed: 01:59 (hh:mm)
-	Num Processes: 6
-	CPU Ram per process: 64Gb
-	Num GPU(s): 1 (NVIDIA RTX 2080 Ti)
-	Ouput: /users/mirimia/narecco/projects/12_Predicted_Structures/data/pdb/CF/short_seq
-	Log file: /users/mirimia/narecco/qsub_out/<TODAY>/CF/short_seq_std{out|err}.log
-
-GPU exported variables:
-	Visible GPUs: 
-	TensorFlow unified memory: 1
-	Allow GPU memory pre-allocation: 
-	Pre-allocated percentage of currently-available GPU memory (if allowed): 4.0%
-	Minimal GPU footprint: 
-	Allow GPU growth: 
-```
-Please note that the first time `colabfold_batch` is run, it automatically downloads the AlphaFold2 model parameters as you can see with:
-```sh
-ls ~/software/colabfold/colabfold/params
-params_model_1.npz params_model_2.npz params_model_3.npz params_model_4.npz params_model_5.npz 
-params_model_1_ptm.npz params_model_2_ptm.npz params_model_3_ptm.npz params_model_4_ptm.npz params_model_5_ptm.npz
-```
-This is also shown in the log file:
-```sh
-Downloading alphafold2 weights to /users/mirimia/narecco/software/colabfold/colabfold:   0% 0/3722752000 [00:00<?, ?it/s]
-# ....
-Downloading alphafold2 weights to /users/mirimia/narecco/software/colabfold/colabfold: 100% 3.47G/3.47G [01:13<00:00, 50.8MB/s]
-```
-
-To check the full usage of the bash script to submit the jobs to the CRG cluster use the `-h` command:
+Specify the input and prediction parameter in the script called `CRG_conda_run_colabfold.sh`.
+By default I set these `colabfold_batch` parameters:
 
 ```sh
-./CRG_conda_run_colabfold.sh -h
+colabfold_batch --amber --templates --num-recycle 20 --recycle-early-stop-tolerance 0.5 \
+								--use-gpu-relax --num-models 5 --model-order 1,2,3,4,5 \
+								--random-seed 16 --model-type auto ${INPUT} ${OUTPUT}
 ```
-
-```bash
-Usage: ./CRG_conda_run_colabfold.sh -i <DIR|FASTA> -q <'gpu'|'gpu_long'> <EXTRA OPTIONS>
-
-Required Parameters:
--i <DIR|FASTA>          Path to directory with input fasta/a3m files or a csv/tsv file or a fasta file or an a3m file.
--q <'gpu'|'gpu_long'>   Name of the CRG gpu queue to use. This script selects the right hard resource to use for the prediction based on the queue.
-
-Additional Parameters:
--o <OUTPUT/PATH/DIR>    Relative path from /users/mirimia/narecco to a directory that will store the results. Example: -o sharing/cf_for_friend
--m <'multi'>            Run CF with a specific AF2 multimer mode. Deafult is <'auto'>.
--h                      Show this help and exit.
+You can submit jobs always making sure the `conda colabfold` environment is activated and that the script as execution rights (i.e. `chmod +x CRG_conda_run_colabfold.sh`) with:
+```sh
+qsub ./CRG_conda_run_colabfold.sh
 ```
-
+This will launch a job on the `gpu` or `gpu_long`queues.
 # Run a multimer prediction
 
-The file `example/Nucleosome.fasta` contains 4 protein sequences formatted like this:
+The file `example/Nucleosome.fasta` contains two copies of the 4 histone proteins sequences formatted like this:
 ```fasta
 >Nucleosome_H3.1_H4_H2A-2a_H2B-1b_Human
-MARTKQTARKSTGGKAPRKQLATKAARKSAPATGGVKKPHRYRPGTVALREIRRYQKSTELLIRKLPFQRLVREIAQDFKTDLRFQSSAVMALQEACEAYLVGLFEDTNLCAIHAKRVTIMPKDIQLARRIRGERA:
-MSGRGKGGKGLGKGGAKRHRKVLRDNIQGITKPAIRRLARRGGVKRISGLIYEETRGVLKVFLENVIRDAVTYTEHAKRKTVTAMDVVYALKRQGRTLYGFGG:
-MSGRGKQGGKARAKAKSRSSRAGLQFPVGRVHRLLRKGNYAERVGAGAPVYMAAVLEYLTAEILELAGNAARDNKKTRIIPRHLQLAIRNDEELNKLLGKVTIAQGGVLPNIQAVLLPKKTESHHKAKGK:
-MPEPSKSAPAPKKGSKKAITKAQKKDGKKRKRSRKESYSIYVYKVLKQVHPDTGISSKAMGIMNSFVNDIFERIAGEASRLAHYNKRSTITSREIQTAVRLLLPGELAKHAVSEGTKAVTKYTSSK
+MARTK --- H3  --- RIRGERA:
+MSGRG --- H4  --- TLYGFGG:
+MSGRG --- H2A --- HHKAKGK:
+MPEPS --- H2B --- VTKYTSSK:
+MARTK --- H3  --- RIRGERA:
+MSGRG --- H4  --- TLYGFGG:
+MSGRG --- H2A --- HHKAKGK:
+MPEPS --- H2B --- VTKYTSSK
 ```
-where the colon `:` is used to concatenate two or more sequences. For this kind of "multimer" input the command to run is the same as before:
+where the colon `:` is used to concatenate two or more sequences. For this kind of multimer input the command to run is the same as before as `colabfold_batch` understands the input is a multimer and use the appropriate `model-type`. What might be crucial is the number of `num-recycle`.
+
+Submit the prediction as before with:
+
 ```sh
-./CRG_conda_run_colabfold.sh -i example/Nucleosome.fasta -q 'gpu' 
+qsub ./CRG_conda_run_colabfold.sh
 ```
 

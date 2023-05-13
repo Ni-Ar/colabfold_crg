@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Small script to be used for installation debugging
+# Author: Niccolo' Arecco
+# Last modifications 13/May/2023
+
 #$ -q gpu
 #$ -pe smp 3
 #$ -cwd
@@ -27,6 +31,7 @@ cd $CF_DIR
 # export COLABFOLDDIR="${HOME}/software/colabfold"
 # export XDG_CACHE_HOME="${HOME}/software/colabfold"
 
+# Run a small python script
 python python_configuration_test.py  
 
 echo -e "\nChecking GPUs\n"

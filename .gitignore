@@ -7,13 +7,15 @@
 # colabfold parameters from alphafold
 colabfold/params*
 
-# other things
+# log files
+cf_*
+test_log_*
+
+# old stuff
 matplotlib/*
 stereo_chemical_props.txt
 
-# my old things
+# my other stuff
+my_run_colabfold.sh
 old_stuff/*
 GPU_3090_*.sh
-test_log_*
-cf_stderr.log*
-cf_stdout.log

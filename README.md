@@ -71,6 +71,35 @@ conda update -n base conda -y
 ```
 This was tested with `conda` version 4.14.0.
 
+**Note**: once `conda` is successfully installed please check that in your `.bashrc` you have something that looks like this:
+
+```sh
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/users/<group>/<users>/software/miniconda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/users/<group>/<users>/software/miniconda/etc/profile.d/conda.sh" ]; then
+        . "/users/<group>/<users>/software/miniconda/etc/profile.d/conda.sh"
+    else
+        export PATH="/users/<group>/<users>/software/miniconda/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+```
+
+where your `<group>` is your CRG group name and `<user>` is your login username.
+
+Also check that your `.bash_profile` has a line like this:
+
+```sh
+export PATH=$PATH:$HOME/software/miniconda3/bin
+```
+
+To export miniconda.
+
 ## Linux Requirment
 
 1. For CRG users you need to [open a ticket to IT](https://request.crg.es/) to request access to the GPU cluster.
@@ -119,6 +148,7 @@ gcc (conda-forge gcc 12.2.0-19) 12.2.0
 
 ## Install `python` packages 
 Start with:
+
 ```sh
 conda install -c conda-forge python=3.8 cudnn==8.2.1.32 cudatoolkit==11.1.1 openmm==7.5.1 pdbfixer -y
 ```
@@ -222,8 +252,10 @@ default_data_dir = Path(appdirs.user_cache_dir(__package__ or "colabfold"))
 Create a variable `COLABFOLDDIR` with your default `path/to/folder`. In my case it looks like this:
 
 ```shell
-COLABFOLDDIR="/users/mirimia/narecco/software/colabfold"
+COLABFOLDDIR="/users/<group>/<user>/software/colabfold"
 ```
+
+Where your `<group>` is your CRG group name and `<user>` is your login username.
 
 Modify the default params directory with:
 
@@ -240,7 +272,7 @@ grep -A1 -B3 "default_data_dir = Path(" download.py
 ```python
 # The data dir location logic switches between a version with and one without "params" because alphafold
 # always internally joins "params". (We should probably patch alphafold)
-default_data_dir = Path("/users/mirimia/narecco/software/colabfold/colabfold")
+default_data_dir = Path("/users/<group>/<user>/software/colabfold/colabfold")
 ```
 
 #### Remove cache directory
@@ -262,7 +294,7 @@ colabfold_batch --help
 ```
 Which shows the usage.
 
-### Download the alphafold params
+### Download Alphafold2 params
 
 Simply run:
 
@@ -293,7 +325,7 @@ If everything went well you should be able to run colabfold. I made a small scri
 ```sh
 cd ~/software/colabfold
 conda activate colabfold
-qsub ~/software/colabfold/submission_test.sh 
+qsub ./submission_test.sh 
 ```
 
 and then check the log with:
@@ -306,22 +338,25 @@ This test script will try to load the libraries `tensorflow`, `jax`, and `jaxlib
 
 # Run a monomer prediction
 
-Specify the input and prediction parameter in the script called `CRG_conda_run_colabfold.sh`.
-By default I set these `colabfold_batch` parameters:
+Specify the the SGE job options, input, output, and prediction parameter in the script called `CRG_conda_run_colabfold.sh`. By default I set these `colabfold_batch` parameters:
 
 ```sh
 colabfold_batch --amber --templates --num-recycle 20 --recycle-early-stop-tolerance 0.5 \
 								--use-gpu-relax --num-models 5 --model-order 1,2,3,4,5 \
-								--random-seed 16 --model-type auto ${INPUT} ${OUTPUT}
+								--random-seed 16 --model-type auto <INPUT> <OUTPUT>
 ```
+If you need an example sequence as input try `example/short_seq.fasta`.
+
 You can submit jobs always making sure the `conda colabfold` environment is activated and that the script as execution rights (i.e. `chmod +x CRG_conda_run_colabfold.sh`) with:
+
 ```sh
 qsub ./CRG_conda_run_colabfold.sh
 ```
-This will launch a job on the `gpu` or `gpu_long`queues.
+This can be used to launch a job on the `gpu` or `gpu_long`queues.
 # Run a multimer prediction
 
-The file `example/Nucleosome.fasta` contains two copies of the 4 histone proteins sequences formatted like this:
+If you want to try a multimer prediction, the file `example/Nucleosome.fasta` contains two copies of the 4 histone proteins sequences formatted like this:
+
 ```fasta
 >Nucleosome_H3.1_H4_H2A-2a_H2B-1b_Human
 MARTK --- H3  --- RIRGERA:
@@ -333,9 +368,9 @@ MSGRG --- H4  --- TLYGFGG:
 MSGRG --- H2A --- HHKAKGK:
 MPEPS --- H2B --- VTKYTSSK
 ```
-where the colon `:` is used to concatenate two or more sequences. For this kind of multimer input the command to run is the same as before as `colabfold_batch` understands the input is a multimer and use the appropriate `model-type`. What might be crucial is the number of `num-recycle`.
+where the colon `:` is used to concatenate two or more sequences. For this kind of multimer input the command to run is the same as before as `colabfold_batch` understands the input is a multimer and use the appropriate `model-type`. 
 
-Submit the prediction as before with:
+Submit the prediction as before (after setting the input and output) with:
 
 ```sh
 qsub ./CRG_conda_run_colabfold.sh

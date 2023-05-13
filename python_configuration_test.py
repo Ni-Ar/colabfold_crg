@@ -14,3 +14,4 @@ print("Num of GPU seen by tensorflow: ", len(physical_GPU_devices))
 
 print("jax devices: ", jax.devices())
 print("jax local device count: ", jax.local_device_count())
+

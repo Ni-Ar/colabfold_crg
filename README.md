@@ -13,8 +13,8 @@ I don't want to deal with installation and scripts, where can I find pre-compute
 My protein sequence is not in UniProt how can I quickly run ColabFold?
 - Use one of the offical [google colab notebooks](https://github.com/sokrypton/ColabFold#making-protein-folding-accessible-to-all-via-google-colab).
 
-I'm looking for something a bit more streamlined to implement in existing workflows. Running code from a web browser tab is not always ideal, e.g. lots of sequences to model and integrate with other tools.
-- Then you've come to right place and this repo could be useful for you!
+I'm looking for something a bit more streamlined to implement in existing workflows. Running code from a web browser tab is not always ideal, e.g. lots of sequences to model and integrate with other tools. Is this gonna help me>?
+- Yes, you've come to right place and this repo could be useful for you!
 
 What is this repo actually containing?
 - Basically the [LocalColabFold](https://github.com/YoshitakaMo/localcolabfold) installation steps and a script for submitting to the CRG graphics cards.
@@ -49,7 +49,7 @@ where inside `CRG_conda_run_colabfold.sh` you specify the input fasta file and t
 
 # Installation
 
-These following steps are adapted from [this script of localColabFold](https://github.com/YoshitakaMo/localcolabfold/blob/main/install_colabbatch_linux.sh) repository. The installation fits my current folder structure and already existing conda.
+These following steps are adapted from [this script of localColabFold](https://github.com/YoshitakaMo/localcolabfold/blob/main/install_colabbatch_linux.sh) repository.
 
 ## Make a `conda` environment
 If you don't have `miniconda` please first [install it](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html). If you have `conda` already installed please pay attention where it is installed with `which conda`. In my case, it returns `~/software/miniconda/condabin/conda`, however for most people it usually returns `~/miniconda3/condabin/conda`. This is important because later there is one source code editing hack to the colabfold python scripts installed by `conda`. 
@@ -76,14 +76,14 @@ This was tested with `conda` version 4.14.0.
 ```sh
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/users/<group>/<users>/software/miniconda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+__conda_setup="$('/users/<group>/<user>/software/miniconda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/users/<group>/<users>/software/miniconda/etc/profile.d/conda.sh" ]; then
-        . "/users/<group>/<users>/software/miniconda/etc/profile.d/conda.sh"
+    if [ -f "/users/<group>/<user>/software/miniconda/etc/profile.d/conda.sh" ]; then
+        . "/users/<group>/<user>/software/miniconda/etc/profile.d/conda.sh"
     else
-        export PATH="/users/<group>/<users>/software/miniconda/bin:$PATH"
+        export PATH="/users/<group>/<user>/software/miniconda/bin:$PATH"
     fi
 fi
 unset __conda_setup
@@ -288,13 +288,11 @@ Go back to the software directory:
 ```sh
 cd ~/software/colabfold/
 ```
-Now the script should be ready to be run (if the `colabfold` `conda` environment is still active) with:
+Test that everything went fine by trying to show the usage notes (if the `colabfold` `conda` environment is still active) with:
 ```sh
 colabfold_batch --help
 ```
-Which shows the usage.
-
-### Download Alphafold2 params
+## Download Alphafold2 params
 
 Simply run:
 
@@ -305,7 +303,7 @@ python3.8 -m colabfold.download
 which shows the progress bar
 
 ```shell
-Downloading alphafold2 weights to /users/mirimia/narecco/software/colabfold/colabfold
+Downloading alphafold2 weights to /users/<group>/<user>/software/colabfold/colabfold
 ```
 
 the whole `params` folder is 6.3Gb as shown with ` du -h colabfold/params`.
@@ -338,7 +336,7 @@ This test script will try to load the libraries `tensorflow`, `jax`, and `jaxlib
 
 # Run a monomer prediction
 
-Specify the the SGE job options, input, output, and prediction parameter in the script called `CRG_conda_run_colabfold.sh`. By default I set these `colabfold_batch` parameters:
+Specify the the SGE job options, input, output, and prediction parameter in the script called `CRG_conda_run_colabfold.sh`. I set these `colabfold_batch` parameters:
 
 ```sh
 colabfold_batch --amber --templates --num-recycle 20 --recycle-early-stop-tolerance 0.5 \
@@ -347,7 +345,9 @@ colabfold_batch --amber --templates --num-recycle 20 --recycle-early-stop-tolera
 ```
 If you need an example sequence as input try `example/short_seq.fasta`.
 
-You can submit jobs always making sure the `conda colabfold` environment is activated and that the script as execution rights (i.e. `chmod +x CRG_conda_run_colabfold.sh`) with:
+Make sure that the job submission script as execution rights, if not do: `chmod +x CRG_conda_run_colabfold.sh`.
+
+You can submit jobs always making sure the `conda colabfold` environment is activated awith:
 
 ```sh
 qsub ./CRG_conda_run_colabfold.sh
@@ -376,3 +376,18 @@ Submit the prediction as before (after setting the input and output) with:
 qsub ./CRG_conda_run_colabfold.sh
 ```
 
+# Visualise the predicted structures
+
+For visual interactive exploration of the predictions I recommend using [ChimeraX](https://www.rbvi.ucsf.edu/chimerax/). After installing it, simply type in the commands prompt bar:
+
+```shell
+open ~/path/to/predicted/file.pdb
+```
+
+If you want to colour the structure by pLDTT use:
+
+```
+color bfactor palette alphafold
+```
+
+Notable alternative softwares are [PyMOL](https://pymol.org/2/) or [YASARA](http://www.yasara.org/index.html).

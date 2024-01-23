@@ -1,6 +1,4 @@
-```
 [![DOI](https://zenodo.org/badge/540397823.svg)](https://zenodo.org/doi/10.5281/zenodo.10556981)
-```
 
 # FAQ
 

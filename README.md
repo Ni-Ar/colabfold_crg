@@ -343,7 +343,7 @@ colabfold_batch --amber --templates --num-recycle 20 --recycle-early-stop-tolera
 								--use-gpu-relax --num-models 5 --model-order 1,2,3,4,5 \
 								--random-seed 16 --model-type auto <INPUT> <OUTPUT>
 ```
-If you need an example sequence as input try `example/short_seq.fasta`.
+If you need an example sequence as input try `example_input/short_seq.fasta`.
 
 Make sure that the job submission script as execution rights, if not do: `chmod +x CRG_conda_run_colabfold.sh`.
 
@@ -355,7 +355,7 @@ qsub ./CRG_conda_run_colabfold.sh
 This can be used to launch a job on the `gpu` or `gpu_long`queues.
 # Run a multimer prediction
 
-If you want to try a multimer prediction, the file `example/Nucleosome.fasta` contains two copies of the 4 histone proteins sequences formatted like this:
+If you want to try a multimer prediction, the file `example_input/Nucleosome.fasta` contains two copies of the 4 histone proteins sequences formatted like this:
 
 ```fasta
 >Nucleosome_H3.1_H4_H2A-2a_H2B-1b_Human
@@ -391,3 +391,10 @@ color bfactor palette alphafold
 ```
 
 Notable alternative softwares are [PyMOL](https://pymol.org/2/) or [YASARA](http://www.yasara.org/index.html).
+
+# PRC2 models with SUZ12 alternative proteoforms
+
+To reproduce the results presented in figures 3F and supplementary 3F of the paper (**insert citation**) follow the instructions as reported above using the 2 different input sequences contained in the folder `example_input` folder. 
+
+The computed output used in the paper can be found in the `example_output` folder. 
+

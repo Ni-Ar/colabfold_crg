@@ -32,7 +32,7 @@ What are the advantages of using this *local* ColabFold?
 
 What's the *longest* protein structure I can predict?
 
-- In my experience I predicted a 4 proteins complex with a combined sequence length of 2328 aminoacids. (I believe the biggest limiting factor is the MSA size)
+- In my experience I predicted a 4 proteins complex with a combined sequence length of 3230 aminoacids. (I believe the biggest limiting factor is the MSA size)
 
 Is this script limited to the CRG users? 
 
